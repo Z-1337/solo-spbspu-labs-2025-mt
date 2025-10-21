@@ -4,7 +4,7 @@ Clicker::Clicker():
   start_(std::chrono::high_resolution_clock::now())
 {}
 
-double Clicker::millisec() const
+double Clicker::microsec() const
 {
   using std::chrono::high_resolution_clock;
   using std::chrono::duration_cast;

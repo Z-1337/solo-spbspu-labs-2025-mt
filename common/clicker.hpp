@@ -6,7 +6,7 @@
 struct Clicker
 {
   Clicker();
-  double millisec() const;
+  double microsec() const;
 
   private:
     std::chrono::time_point< std::chrono::system_clock > start_;
