@@ -7,33 +7,54 @@ int main(int argc, char* argv[])
   if (argc == 1 || argc > 3)
   {
     std::cerr << "Invalid number of elements!\n";
-    return 0;
+    return 1;
   }
-  unsigned int tries = std::atoi(argv[1]);
-  unsigned int seed = 0;
+
+  int tries = std::atoi(argv[1]);
+  if (tries < 0)
+  {
+    std::cerr << "Invalid amount of tries!\n";
+    return 1;
+  }
+
+  int seed = 0;
   if (argc == 3)
   {
     seed = std::atoi(argv[2]);
+    if (seed < 0)
+    {
+      std::cerr < "Invalid seed value!\n";
+      return 1;
+    }
   }
+
   while (!std::cin.eof())
   {
     double radius = 0;
-    unsigned int number_of_threads = 0;
+    int number_of_threads = 0;
     std::cin >> radius >> number_of_threads;
+
     if (radius < 0)
     {
-      std::cerr << "Incorrect radius!\n";
-      continue;
+      std::cerr << "Invalid radius!\n";
+      return 1;
     }
+    if (number_of_threads < 0)
+    {
+      std::cerr << "Invalid number of threads!\n"
+      return 1;
+    }
+
     Clicker cl;
-    double init = cl.millisec();
+    double init = cl.microsec();
     volatile long long result = 1;
+
     for (size_t i = 0; i < 100000000; ++i)
     {
       result = result * 2;
     }
-    std::cout << "result: " << result << "\n";
-    double end = cl.millisec();
+
+    double end = cl.microsec();
     //i would put start clock here when i remember how to do it
     //some tricky wise multithreaded calculations
     //end clock
@@ -43,5 +64,6 @@ int main(int argc, char* argv[])
     std::cout << std::fixed << std::setprecision(3) << "time: " << total << "\n\n";
     //time output
   }
+
   std::cout << "tries: " << tries << "\nseed: " << seed << "\n";
 }
