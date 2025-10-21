@@ -1,6 +1,7 @@
 #include <iostream>
-#include "clicker.hpp"
+#include "../common/clicker.hpp"
 #include "../common/streamguard.hpp"
+#include "shapes/circle.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -23,7 +24,7 @@ int main(int argc, char* argv[])
     seed = std::atoi(argv[2]);
     if (seed < 0)
     {
-      std::cerr < "Invalid seed value!\n";
+      std::cerr << "Invalid seed value!\n";
       return 1;
     }
   }
@@ -41,29 +42,34 @@ int main(int argc, char* argv[])
     }
     if (number_of_threads < 0)
     {
-      std::cerr << "Invalid number of threads!\n"
+      std::cerr << "Invalid number of threads!\n";
       return 1;
     }
 
     Clicker cl;
     double init = cl.microsec();
-    volatile long long result = 1;
 
+    volatile long long result = 1;
     for (size_t i = 0; i < 100000000; ++i)
     {
       result = result * 2;
     }
+    Circle circle(radius);
+    Rectangle MonteCarloZone = circle.getFrameRectangle();
 
     double end = cl.microsec();
+    double total = (end - init) / 1000;
+
     //i would put start clock here when i remember how to do it
     //some tricky wise multithreaded calculations
     //end clock
-    double total = (end - init) / 1000;
-    std::cout << "radius: " << radius << "\nnumber of threads: " << number_of_threads << "\n";
+    std::cout << "radius: " << radius << "\n";
+    std::cout << "number of threads: " << number_of_threads << "\n";
     StreamGuard s(std::cout);
     std::cout << std::fixed << std::setprecision(3) << "time: " << total << "\n\n";
     //time output
   }
 
-  std::cout << "tries: " << tries << "\nseed: " << seed << "\n";
+  std::cout << "tries: " << tries << "\n";
+  std::cout << "seed: " << seed << "\n";
 }
