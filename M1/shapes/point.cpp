@@ -9,3 +9,9 @@ Point::Point(double x, double y):
   x_(x),
   y_(y)
 {}
+
+std::ostream& operator<<(std::ostream& out, const Point& point)
+{
+  out << "(" << point.x_ << ", " << point.y_ << ")";
+  return out;
+}

@@ -2,6 +2,7 @@
 #include "../common/clicker.hpp"
 #include "../common/streamguard.hpp"
 #include "shapes/circle.hpp"
+#include "montecarlo.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -12,7 +13,7 @@ int main(int argc, char* argv[])
   }
 
   int tries = std::atoi(argv[1]);
-  if (tries < 0)
+  if (tries < 1)
   {
     std::cerr << "Invalid amount of tries!\n";
     return 1;
@@ -29,18 +30,21 @@ int main(int argc, char* argv[])
     }
   }
 
-  while (!std::cin.eof())
+  while (true)
   {
     double radius = 0;
     int number_of_threads = 0;
     std::cin >> radius >> number_of_threads;
-
-    if (radius < 0)
+    if (std::cin.eof())
+    {
+      break;
+    }
+    if (radius < 1)
     {
       std::cerr << "Invalid radius!\n";
       return 1;
     }
-    if (number_of_threads < 0)
+    if (number_of_threads < 1)
     {
       std::cerr << "Invalid number of threads!\n";
       return 1;
@@ -56,18 +60,15 @@ int main(int argc, char* argv[])
     }
     Circle circle(radius);
     Rectangle MonteCarloZone = circle.getFrameRectangle();
+    //std::cout << "testgen: " << generatePoint(seed, MonteCarloZone) << "\n"; //Оставил под комментом в коде, чтоб не потерять. Рабочий генератор
 
     double end = cl.microsec();
     double total = (end - init) / 1000;
 
-    //i would put start clock here when i remember how to do it
-    //some tricky wise multithreaded calculations
-    //end clock
     std::cout << "radius: " << radius << "\n";
     std::cout << "number of threads: " << number_of_threads << "\n";
     StreamGuard s(std::cout);
     std::cout << std::fixed << std::setprecision(3) << "time: " << total << "\n\n";
-    //time output
   }
 
   std::cout << "tries: " << tries << "\n";
