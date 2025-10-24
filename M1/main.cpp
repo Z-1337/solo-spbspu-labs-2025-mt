@@ -1,6 +1,4 @@
-#include <numeric>
 #include <functional>
-#include <algorithm>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -8,18 +6,6 @@
 #include "../common/streamguard.hpp"
 #include "shapes/circle.hpp"
 #include "montecarlo.hpp"
-
-using data_t = std::vector< unsigned long long >;
-using value_t = data_t::value_type;
-using c_it_t = data_t::const_iterator;
-using it_t = data_t::iterator;
-
-value_t sum_data(c_it_t begin, c_it_t end) {
-  return std::accumulate(begin, end, value_t{0});
-}
-void sum_data_th(c_it_t begin, c_it_t end, it_t res) {
-  *res = sum_data(begin, end);
-}
 
 int main(int argc, char* argv[])
 {
@@ -58,7 +44,7 @@ int main(int argc, char* argv[])
     {
       break;
     }
-    if (radius < 1)
+    if (radius < 0)
     {
       std::cerr << "Invalid radius!\n";
       return 1;
@@ -86,17 +72,17 @@ int main(int argc, char* argv[])
         filteredPoints.push_back(p);
       }
     }
-    double circleArea = static_cast< double >(filteredPoints.size()) / static_cast< double >(generatedPoints.size()) * MonteCarloZone.getArea();
-    std::cout << "Area of the circle: " << circleArea << "\n";
-    std::cout << "size of filtered: " << filteredPoints.size() << "\n";
+    double ratio = static_cast< double >(filteredPoints.size()) / static_cast< double >(generatedPoints.size());
+    double circleArea = ratio * MonteCarloZone.getArea();
+    StreamGuard s(std::cout);
+    std::cout << "Area of the circle: " << std::fixed << std::setprecision(3) << circleArea << "\n";
 
     double end = cl.microsec();
     double total = (end - init) / 1000;
 
     std::cout << "radius: " << radius << "\n";
     std::cout << "number of threads: " << number_of_threads << "\n";
-    StreamGuard s(std::cout);
-    std::cout << std::fixed << std::setprecision(3) << "time: " << total << "\n\n";
+    std::cout << std::fixed << std::setprecision(3) << "time: " << total << " ms\n\n";
   }
 
   std::cout << "tries: " << tries << "\n";
