@@ -6,3 +6,8 @@ Rectangle::Rectangle():
   br_(0, 0),
   bl_(0, 0)
 {}
+
+double Rectangle::getArea()
+{
+  return tr_.x_ * tr_.y_ * 4;
+}

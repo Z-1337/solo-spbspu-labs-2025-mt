@@ -3,6 +3,7 @@
 
 #include "shapes/circle.hpp"
 
-Point generatePoint(int seed, Rectangle frameRectangle);
+Point generatePoint(std::mt19937& gen, Rectangle frameRectangle);
+bool isInCircle(Point point, Circle circle);
 
 #endif

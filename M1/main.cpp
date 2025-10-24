@@ -1,8 +1,25 @@
+#include <numeric>
+#include <functional>
+#include <algorithm>
 #include <iostream>
+#include <thread>
+#include <vector>
 #include "../common/clicker.hpp"
 #include "../common/streamguard.hpp"
 #include "shapes/circle.hpp"
 #include "montecarlo.hpp"
+
+using data_t = std::vector< unsigned long long >;
+using value_t = data_t::value_type;
+using c_it_t = data_t::const_iterator;
+using it_t = data_t::iterator;
+
+value_t sum_data(c_it_t begin, c_it_t end) {
+  return std::accumulate(begin, end, value_t{0});
+}
+void sum_data_th(c_it_t begin, c_it_t end, it_t res) {
+  *res = sum_data(begin, end);
+}
 
 int main(int argc, char* argv[])
 {
@@ -30,6 +47,8 @@ int main(int argc, char* argv[])
     }
   }
 
+  std::mt19937 gen(seed);
+
   while (true)
   {
     double radius = 0;
@@ -53,14 +72,23 @@ int main(int argc, char* argv[])
     Clicker cl;
     double init = cl.microsec();
 
-    volatile long long result = 1;
-    for (size_t i = 0; i < 100000000; ++i)
-    {
-      result = result * 2;
-    }
     Circle circle(radius);
     Rectangle MonteCarloZone = circle.getFrameRectangle();
-    //std::cout << "testgen: " << generatePoint(seed, MonteCarloZone) << "\n"; //Оставил под комментом в коде, чтоб не потерять. Рабочий генератор
+
+    std::vector< Point > generatedPoints;
+    std::vector< Point > filteredPoints;
+    for (size_t i = 0; i < tries; ++i)
+    {
+      Point p = generatePoint(gen, MonteCarloZone);
+      generatedPoints.push_back(p);
+      if (isInCircle(p, circle))
+      {
+        filteredPoints.push_back(p);
+      }
+    }
+    double circleArea = static_cast< double >(filteredPoints.size()) / static_cast< double >(generatedPoints.size()) * MonteCarloZone.getArea();
+    std::cout << "Area of the circle: " << circleArea << "\n";
+    std::cout << "size of filtered: " << filteredPoints.size() << "\n";
 
     double end = cl.microsec();
     double total = (end - init) / 1000;
