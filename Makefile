@@ -28,10 +28,10 @@ endif
 
 tasks := $(filter-out out Makefile,$(wildcard *))
 
-task_sources        = $(wildcard $(1)/*.cpp)
-task_headers        = $(wildcard $(1)/*.h) $(wildcard $(1)/*.hpp) $(wildcard $(1)/*.hxx)
-task_common_sources = $(if $(wildcard $(1)/common),$(wildcard $(1)/common/*.cpp))
-task_common_headers = $(if $(wildcard $(1)/common),$(wildcard $(1)/common/*.h) $(wildcard $(1)/common/*.hpp) $(wildcard $(1)/common/*.hxx))
+task_sources        = $(shell find $(1) -name "*.cpp")
+task_headers        = $(shell find $(1) -name "*.h" -o -name "*.hpp" -o -name "*.hxx")
+task_common_sources = $(if $(wildcard $(1)/../common),$(wildcard $(1)/../common/*.cpp))
+task_common_headers = $(if $(wildcard $(1)/../common),$(wildcard $(1)/../common/*.h) $(wildcard $(1)/../common/*.hpp) $(wildcard $(1)/../common/*.hxx))
 
 task_objects        = $(patsubst %.cpp,out/%.o,$(call task_sources,$(1)) $(call task_common_sources,$(1)))
 task_header_checks  = $(addprefix out/,$(addsuffix .header,$(call task_headers,$(1)) $(call task_common_headers,$(1))))
@@ -40,7 +40,7 @@ objects            := $(sort $(foreach task,$(tasks),$(call task_objects,$(task)
 test_objects       := $(sort $(foreach task,$(tasks),$(call task_test_objects,$(task))))
 header_checks      := $(sort $(foreach task,$(tasks),$(call task_header_checks,$(task))))
 
-common_include     = $(if $(wildcard $(1)/common),-I$(1)/common -I$(1)/common/include)
+common_include     = $(if $(wildcard $(1)/../common),-I$(1)/../common -I$(1)/../common/include)
 
 all:
 	$(addprefix build-,$(tasks))
