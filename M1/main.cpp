@@ -1,4 +1,5 @@
 #include <functional>
+#include <numeric>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -6,6 +7,25 @@
 #include "../common/streamguard.hpp"
 #include "shapes/circle.hpp"
 #include "montecarlo.hpp"
+
+double gen_points(size_t per_thread, Rectangle MonteCarloZone, Circle circle, int seed)
+{
+  std::mt19937 gen(seed);
+  double local_amount = 0;
+  for (size_t i = 0; i < per_thread; ++i)
+  {
+    if (isInCircle(generatePoint(gen, MonteCarloZone), circle))
+    {
+      ++local_amount;
+    }
+  }
+  return local_amount;
+}
+
+void gen_points_th(size_t per_thread, Rectangle MonteCarloZone, Circle circle, std::vector< double >::iterator results, int seed)
+{
+  *results = gen_points(per_thread, MonteCarloZone, circle, seed);
+}
 
 int main(int argc, char* argv[])
 {
@@ -15,7 +35,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  int tries = std::atoi(argv[1]);
+  size_t tries = std::stoll(argv[1]);
   if (tries < 1)
   {
     std::cerr << "Invalid amount of tries!\n";
@@ -25,7 +45,7 @@ int main(int argc, char* argv[])
   int seed = 0;
   if (argc == 3)
   {
-    seed = std::atoi(argv[2]);
+    seed = std::stoi(argv[2]);
     if (seed < 0)
     {
       std::cerr << "Invalid seed value!\n";
@@ -33,12 +53,10 @@ int main(int argc, char* argv[])
     }
   }
 
-  std::mt19937 gen(seed);
-
   while (true)
   {
     double radius = 0;
-    int number_of_threads = 0;
+    size_t number_of_threads = 0;
     std::cin >> radius >> number_of_threads;
     if (std::cin.eof())
     {
@@ -55,24 +73,32 @@ int main(int argc, char* argv[])
       return 1;
     }
 
+    std::vector< std::thread > ths;
+    ths.reserve(number_of_threads);
+
     Clicker cl;
     double init = cl.microsec();
+
+    size_t per_thread = tries / number_of_threads;
+    size_t i = 0;
+    std::vector< double > results(number_of_threads, 0);
 
     Circle circle(radius);
     Rectangle MonteCarloZone = circle.getFrameRectangle();
 
-    double amount_of_generated_points = 0;
-    double amount_of_filtered_points = 0;
-    for (int i = 0; i < tries; ++i)
+    for (; i < number_of_threads - 1; ++i)
     {
-      Point p = generatePoint(gen, MonteCarloZone);
-      ++amount_of_generated_points;
-      if (isInCircle(p, circle))
-      {
-        ++amount_of_filtered_points;
-      }
+      ths.emplace_back(gen_points_th, per_thread, MonteCarloZone, circle, results.begin() + i, seed);
     }
-    double ratio = amount_of_filtered_points / amount_of_generated_points;
+    gen_points_th((tries % number_of_threads) + per_thread, MonteCarloZone, circle, results.begin() + i, seed);
+
+    for (auto& th: ths)
+    {
+      th.join();
+    }
+
+    double amount_of_filtered_points = std::accumulate(results.begin(), results.end(), 0);
+    double ratio = amount_of_filtered_points / tries;
     double circleArea = ratio * MonteCarloZone.getArea();
     StreamGuard s(std::cout);
     std::cout << "Area of the circle: " << std::fixed << std::setprecision(3) << circleArea << "\n";
