@@ -61,18 +61,18 @@ int main(int argc, char* argv[])
     Circle circle(radius);
     Rectangle MonteCarloZone = circle.getFrameRectangle();
 
-    std::vector< Point > generatedPoints;
-    std::vector< Point > filteredPoints;
-    for (size_t i = 0; i < tries; ++i)
+    double amount_of_generated_points = 0;
+    double amount_of_filtered_points = 0;
+    for (int i = 0; i < tries; ++i)
     {
       Point p = generatePoint(gen, MonteCarloZone);
-      generatedPoints.push_back(p);
+      ++amount_of_generated_points;
       if (isInCircle(p, circle))
       {
-        filteredPoints.push_back(p);
+        ++amount_of_filtered_points;
       }
     }
-    double ratio = static_cast< double >(filteredPoints.size()) / static_cast< double >(generatedPoints.size());
+    double ratio = amount_of_filtered_points / amount_of_generated_points;
     double circleArea = ratio * MonteCarloZone.getArea();
     StreamGuard s(std::cout);
     std::cout << "Area of the circle: " << std::fixed << std::setprecision(3) << circleArea << "\n";
